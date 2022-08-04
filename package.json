@@ -1,0 +1,50 @@
+{
+	"name": "react-object-exhibitor",
+	"version": "1.0.0",
+	"description": "A react component for viewing JSON / JS object.",
+	"homepage": "https://github.com/obsius/react-object-exhibitor",
+	"author": "Jeff Seaman <mr.jeffrey.seaman@gmail.com> (https://www.ngc6822.com)",
+	"license": "MIT",
+	"main": "lib/index.js",
+	"scripts": {
+		"prepare": "rollup -c && copyfiles -u 1 css/* lib"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.18.9",
+		"@babel/plugin-transform-react-jsx": "^7.18.6",
+		"@babel/preset-env": "^7.18.9",
+		"copyfiles": "^2.4.1",
+		"rollup": "^2.77.2",
+		"rollup-plugin-babel": "^4.4.0"
+	},
+	"dependencies": {
+		"react": "^18.2.0"
+	},
+	"babel": {
+		"plugins": [
+			"@babel/transform-react-jsx"
+		],
+		"presets": [
+			[
+				"@babel/preset-env",
+				{
+					"targets": {
+						"chrome": "90"
+					}
+				}
+			]
+		]
+	},
+	"keywords": [
+		"exhibitor",
+		"fast",
+		"json",
+		"object",
+		"objectview",
+		"objectexhibitor",
+		"react",
+		"view",
+		"viewer"
+		
+	]
+}

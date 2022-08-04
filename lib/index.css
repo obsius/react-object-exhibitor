@@ -1,0 +1,94 @@
+/* top div */
+.objectexhibitor {
+	font-family: 'Courier New', Courier, monospace;
+}
+
+/* node div */
+.objectexhibitor-node {
+	display: flex;
+	margin-left: 10px;
+}
+
+/* present when a node has children */
+.objectexhibitor-node-nested {
+	flex-direction: column;
+}
+
+/* present on all nodes (even ones without a key) */
+.objectexhibitor-node-key {}
+
+/* present when a node has children */
+.objectexhibitor-node-key-toggle {}
+.objectexhibitor-node-key-toggle:hover {
+	cursor: pointer;
+}
+
+/* present on all nodes */
+.objectexhibitor-node-value {}
+.objectexhibitor-node-value:not(.objectexhibitor-node-value-nested) {
+	font-weight: 600;
+}
+
+/* present when a node has children */
+.objectexhibitor-node-value-nested {
+	border-left: 1px dashed #cccccc;
+}
+
+/* present when a node is collapsed */
+.objectexhibitor-node-value-hidden {
+	display: none;
+}
+
+/* types styling */
+
+.objectexhibitor-node-value-undefined {
+	color: #999999;
+	font-style: italic;
+	text-transform: uppercase;
+}
+
+.objectexhibitor-node-value-null {
+	color: #666666;
+	font-style: italic;
+	text-transform: uppercase;
+}
+
+.objectexhibitor-node-value-bool {}
+.objectexhibitor-node-value-bool-true {
+	color: #00a900;
+}
+.objectexhibitor-node-value-bool-false {
+	color: #990000;
+}
+
+.objectexhibitor-node-value-number {
+	color: #0067a7;
+}
+
+.objectexhibitor-node-value-symbol {
+	font-style: italic;
+}
+
+.objectexhibitor-node-value-bigint {
+	color: #00a778;
+}
+
+.objectexhibitor-node-value-string {
+	color: #3b2b00;
+}
+
+.objectexhibitor-node-value-date {}
+
+.objectexhibitor-node-value-regex {}
+
+.objectexhibitor-node-value-function {}
+
+.objectexhibitor-node-value-array {}
+.objectexhibitor-node-value-array-empty {}
+
+.objectexhibitor-node-value-object {}
+.objectexhibitor-node-value-object-empty {}
+
+.objectexhibitor-node-value-map {}
+
+.objectexhibitor-node-value-set {}
