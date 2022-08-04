@@ -25,9 +25,9 @@ let obj = {
 	boolFalse: false,
 	string: 'string',
 	number: 100,
-	set: new Set(1, 2, 3),
-	map: new Map('a', 'b', 'c'),
-	regexp: new RegExp(/^.*$/, i),
+	set: new Set([1, 2, 3]),
+	map: new Map([['a', 'a'], ['b', 'b'], ['c', 'c']]),
+	regexp: new RegExp(/^.*$/, 'i'),
 	date: new Date(),
 	array: ['hello', 100, false],
 	typedArray: new Float32Array([3.2, 6.4, 10.24]),
@@ -37,11 +37,11 @@ let obj = {
 			childChildObject: {
 				key: 'value'
 			}
-		},
+		}
 	}
 };
 
-ReactDomClient.createRoot(document.getElementById('root-container')).render(
+ReactDomClient.createRoot(document.body).render(
 	<ObjectExhibitor collapsed obj={obj} />
 );
 ```

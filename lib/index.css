@@ -44,13 +44,11 @@
 .objectexhibitor-node-value-undefined {
 	color: #999999;
 	font-style: italic;
-	text-transform: uppercase;
 }
 
 .objectexhibitor-node-value-null {
 	color: #666666;
 	font-style: italic;
-	text-transform: uppercase;
 }
 
 .objectexhibitor-node-value-bool {}

@@ -1,6 +1,6 @@
 {
 	"name": "react-object-exhibitor",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A react component for viewing JSON / JS object.",
 	"homepage": "https://github.com/obsius/react-object-exhibitor",
 	"author": "Jeff Seaman <mr.jeffrey.seaman@gmail.com> (https://www.ngc6822.com)",
