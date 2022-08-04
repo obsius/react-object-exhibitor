@@ -21,7 +21,7 @@ import 'react-object-exhibitor/lib/index.css';
 let obj = {
 	undefined: undefined,
 	null: null,
-	boolTree: true,
+	boolTrue: true,
 	boolFalse: false,
 	string: 'string',
 	number: 100,
