@@ -20,9 +20,21 @@ const SET =         14;
 // entry point
 export default class ObjectExhibitor extends React.Component {
 	render() {
+
+		let { obj, collapsed = false, skeleton = false, hideRoot = false, hideRootLabel = false } = this.props;
+
 		return (
 			<div className="objectexhibitor">
-				{ morph(this.props.obj, 'root', true, !this.props.collapsed) }
+				{
+					morph({
+						objKey: hideRootLabel ? null : 'root',
+						value: obj,
+						last: true,
+						expanded: !collapsed,
+						hideRoot,
+						skeleton
+					})
+				}
 			</div>
 		);
 	}
@@ -31,7 +43,15 @@ export default class ObjectExhibitor extends React.Component {
 /* inernal */
 
 // passthrough function to precheck an object type and create the appropriate react component
-function morph(value, objKey, isLast = false, expanded = false, auxKey = null) {
+function morph({
+	objKey,
+	auxKey,
+	value,
+	last = false,
+	expanded = false,
+	skeleton = false,
+	hideRoot = false
+}) {
 
 	let type;
 
@@ -85,11 +105,13 @@ function morph(value, objKey, isLast = false, expanded = false, auxKey = null) {
 
 	return React.createElement(type < ARRAY ? PrimitiveNode : ObjectNode, {
 		key: objKey || auxKey,
-		type,
 		objKey,
 		value,
-		isLast,
-		expanded
+		type,
+		last,
+		expanded,
+		skeleton,
+		hideRoot
 	});
 };
 
@@ -114,118 +136,97 @@ class ObjectNode extends React.Component {
 
 	render() {
 
-		let { type, value, objKey, isLast = false } = this.props;
+		let { type, objKey, value, last = false, skeleton = false, hideRoot = false } = this.props;
 		let { expanded } = this.state;
-
-		let empty = false;
 
 		let className = 'objectexhibitor-node';
 		let valueClassName = 'objectexhibitor-node-value';
 
-		// array / typed array
-		if (type < OBJECT) {
+		let i = 0;
+		let children = [];
 
-			// typed array
-			if (type == TYPED_ARRAY) {
+		switch (type) {
 
-				valueClassName += 'objectexhibitor-node-value-typedarray'
+			case ARRAY:
+			case TYPED_ARRAY: {
 
-				// has elements
+				valueClassName += type == TYPED_ARRAY ? ' objectexhibitor-node-value-typedarray' : ' objectexhibitor-node-value-array';
+
 				if (value.length) {
-
-					let children = [];
-					value.forEach((item, i) => children.push(morph(item, null, i == value.length - 1, expanded, i)));
-					value = children;
-
-				// empty
-				} else {
-					empty = true;
+					for (; i < value.length; ++i) {
+						children.push(morph({
+							auxKey: i,
+							value: value[i],
+							last: i == value.length - 1,
+							expanded,
+							skeleton
+						}));
+					}
 				}
 
-			// array
-			} else {
-
-				valueClassName += 'objectexhibitor-node-value-array'
-
-				// has elements
-				if (value.length) {
-					value = value.map((item, i) => morph(item, null, i == value.length - 1, expanded, i));
-
-				// empty
-				} else {
-					empty = true;
-				}
+				break;
 			}
 
-		// object / map / set
-		} else {
-
-			// map
-			if (type == MAP) {
+			case MAP: {
 
 				valueClassName += ' objectexhibitor-node-value-map';
 
-				// has children
 				if (value.size) {
-
-					let i = 0;
-					let children = [];
-
-					value.forEach((item, key) => children.push(morph(item, key, i++ == value.size - 1, expanded)));
-
-					value = children;
-
-				// empty
-				} else {
-					empty = true;
+					for (let keyVal of value) {
+						children.push(morph({
+							objKey: keyVal[0],
+							value: keyVal[1],
+							last: i++ == value.size - 1,
+							expanded,
+							skeleton
+						}));
+					}
 				}
 
-			// set
-			} else if (type == SET) {
+				break;
+			}
 
-				valueClassName += 'objectexhibitor-node-value-set';	
+			case SET: {
+
+				valueClassName += ' objectexhibitor-node-value-set';	
 
 				// has children
 				if (value.size) {
-
-					let i = 0;
-					let children = [];
-
-					value.forEach((item) => children.push(morph(item, null, i == value.size - 1, expanded, i++)));
-
-					value = children;
-
-				// empty
-				} else {
-					empty = true;
+					for (let item of value) {
+						children.push(morph({
+							auxKey: i,
+							value: item,
+							last: i++ == value.size - 1,
+							expanded,
+							skeleton
+						}));
+					}
 				}
 
-			// object
-			} else {
+				break;
+			}
 
-				valueClassName += 'objectexhibitor-node-value-object';	
+			case OBJECT: {
 
-				let keys = Object.keys(value);			
+				valueClassName += ' objectexhibitor-node-value-nested';
 
-				// has children
-				if (keys.length) {
+				let keys = Object.keys(value);
 
-					className += ' objectexhibitor-node-nested';
-					valueClassName += ' objectexhibitor-node-value-nested';
-
-					value = keys.map((key, i) => morph(value[key], key, i == keys.length - 1, expanded, i));
-
-				// empty
-				} else {
-					empty = true;
+				for (let key of keys) {
+					children.push(morph({
+						objKey: key,
+						value: value[key],
+						last: i++ == keys.length - 1,
+						expanded,
+						skeleton
+					}));
 				}
 			}
 		}
 
 		// add empty classname and remove value
-		if (empty) {
+		if (i == 0) {
 			valueClassName = ' objectexhibitor-node-value-empty';
-			value = '';
 
 		// add nested classname and set value to ellipses for collapsed with children
 		} else {
@@ -234,58 +235,75 @@ class ObjectNode extends React.Component {
 		}
 
 		// keep object mounted to preserve expanded state by setting display: none
-		if (!this.state.expanded) {
+		if (!expanded) {
 			valueClassName += ' objectexhibitor-node-value-hidden';
 		}
 
-		// ellipses for collapsed non-empty objects
-		let ellipsesSpan = (!empty && !expanded) && (
-			<span>...</span>
-		);
-
-		// leading wrapper
-		let preSpan = (
-			<span>{ type < OBJECT ? '[' : '{' }</span>
-		);
-
-		// trailing wrapper and comma
-		let postSpan = (
+		let expander = (i > 0) && (
 			<span>
-				<span>{ type < OBJECT ? ']' : '}' }</span>
-				{ !isLast && ',' }
+				{ expanded ? '⏷' : '⏵' }
 			</span>
 		);
 
-		// label with trailing colon space 
-		let label = objKey != null && (
-			<React.Fragment>
-				{ objKey }
+		// label with trailing colon space or no label in skeleton mode reference
+		let label = (objKey != null) ? (
+			<span>
+				<span>{ objKey }</span>
 				<span>:&nbsp;</span>
-			</React.Fragment>				
+			</span>
+		) : (expanded && skeleton) && (
+			<span>
+				<span>{ type < OBJECT ? '[]' : '{}' }</span>
+				<span>:&nbsp;</span>
+			</span>
 		);
 
-		return (
-			<div className={className}>
-				<div className="objectexhibitor-node-key objectexhibitor-node-key-toggle" onClick={this.handleToggle}>
-					<span>
-						{ expanded ? '⏷' : '⏵' }
-					</span>
-					{ label }
-					{ preSpan }
-					{ ellipsesSpan }
-					{ !expanded && postSpan }
-				</div>
-				<div className={valueClassName}>
-					{ value }
-				</div>
-				{ expanded && postSpan }
-			</div>
+		// leading wrapper
+		let preSpan = (!expanded || !skeleton) && (
+			<span>{ type < OBJECT ? '[' : '{' }</span>
 		);
+
+		// ellipses for collapsed non-empty objects
+		let ellipsesSpan = (i > 0 && !expanded) && (
+			<span>...</span>
+		);
+
+		// trailing wrapper and comma
+		let postSpan = (!expanded || !skeleton) && (
+			<span>
+				<span>{ (type < OBJECT) ? ']' : '}' }</span>
+				<span>{ (!last && !skeleton) && ',' }</span>
+			</span>
+		);
+
+		if (hideRoot) {
+			return (
+				<React.Fragment>
+					{ children }
+				</React.Fragment>
+			);
+		} else {
+			return (
+				<div className={className}>
+					<div className="objectexhibitor-node-key objectexhibitor-node-key-toggle" onClick={this.handleToggle}>
+						{ expander }
+						{ label }
+						{ preSpan }
+						{ ellipsesSpan }
+						{ !expanded && postSpan }
+					</div>
+					<div className={valueClassName}>
+						{ children }
+					</div>
+					{ expanded && postSpan }
+				</div>
+			);
+		}
 	}
 }
 
 // primitive node (no children)
-const PrimitiveNode = ({ type, value, objKey, isLast = false }) => {
+const PrimitiveNode = ({ type, objKey, value, last = false }) => {
 
 	let valueClassName = 'objectexhibitor-node-value';
 
@@ -352,7 +370,7 @@ const PrimitiveNode = ({ type, value, objKey, isLast = false }) => {
 	}
 
 	// key div (hidden if no key provided)
-	let keyDiv = objKey != null && (
+	let keyDiv = (objKey != null) && (
 		<div className="objectexhibitor-node-key">
 			<span>{ objKey }</span>
 			<span>:&nbsp;</span>
@@ -360,7 +378,7 @@ const PrimitiveNode = ({ type, value, objKey, isLast = false }) => {
 	);
 
 	// trailing comma (not shown for the last object of a list)
-	let commaSpan = !isLast && (
+	let commaSpan = !last && (
 		<span>,</span>
 	);
 
